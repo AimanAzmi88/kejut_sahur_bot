@@ -72,7 +72,14 @@ async function startBot() {
             if (users[sender].cycles >= 3 && !users[sender].unlocked) {
                 if (!uuidRequests[sender]) {
                     uuidRequests[sender] = true;
-                    await conn.sendMessage(sender, { text: `🚀 Nak guna tanpa had? Jom support projek ni dengan buat *donation* kat *Sociobuzz*! 🔗 https://sociabuzz.com/aimanazmi` });
+                    await conn.sendMessage(sender, { 
+                        text: `🚀 Nak guna tanpa had? Jom support projek ni dengan buat *donation* kat *Sociobuzz*!  
+                        💖 Berapa pun tak kisah, yang penting ikhlas!  
+                        🔗 *Link:* https://sociabuzz.com/aimanazmi  
+                    
+                        📩 Dah donate? Hantar bukti derma kat sini, nanti saya bagi *key* untuk unlock penggunaan tanpa had! Terima kasih sebab support! 🙌`
+                    });
+                    
                     return;
                 }
                 if (text === users[sender].uuid) {
@@ -100,7 +107,7 @@ async function startBot() {
             }
 
             if (text.includes('hye') || text.includes('hello')) {
-                await conn.sendMessage(sender, { text: 'Hye sayang, nak kejut pukul berapa? (e.g., 1:20 atau 5:00)' });
+                await conn.sendMessage(sender, { text: 'Hye awak, mesti nak saya kejut sahur la tu. nak kejut pukul berapa? (e.g., 1:20 atau 5:00)' });
             } else if (/^\d{1,2}:\d{2}$/.test(text)) {
                 const time = convertTo24HourFormat(text);
                 if (!time.valid) {
@@ -110,7 +117,7 @@ async function startBot() {
 
                 wakeUpTimes[sender] = time.formattedTime;
                 saveWakeUpTimes();
-                await conn.sendMessage(sender, { text: `Ok sayang, pukul ${time.formattedTime} nanti saya kejut! 💖` });
+                await conn.sendMessage(sender, { text: `Ok awak, pukul ${time.formattedTime} nanti saya kejut! 💖` });
                 scheduleWakeUpMessage(sender, time.hour24, time.minute);
             }
         }
