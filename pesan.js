@@ -1,15 +1,14 @@
-// pesan.js
 module.exports = {
     firstAttempt: [
-        "Awak, jom bangun sahur. Saya tahu mengantuk, tapi cuba dulu ya? 😊",
-        "Bangun, bangun! Sahur dah ready, sayang diri awak, jangan skip. 🍚",
+        "Awak, jom bangun sahur. Saya tahu mengantuk, makan sikit ok? 😊",
+        "Awak, bangun! Cepat sahur, nanti tak larat nk puasa, jangan skip. 🍚",
         "Awak, jangan malas! Jom bangun sekarang, makan sikit dulu. 🌙",
-        "Saya kejut ni sebab saya ambil berat. Cepat bangun sebelum waktu habis! ⏰",
-        "Jangan tidur lagi, nanti menyesal kalau terlepas sahur! Jom bangun! 😴➡️🍽️",
+        "Awak, bangun. Saya kejut ni sebab saya ambil berat. Cepat bangun sebelum waktu habis! ⏰",
+        "BAngun. Jangan tidur lagi, nanti menyesal kalau terlepas sahur! Jom bangun! 😴➡️🍽️",
         "Bangun, sebelum saya kejut banyak kali! Sahur penting untuk tenaga esok! 💪",
         "Awak, sahur kejap je, makan sikit pun tak apa. Janji ada tenaga nanti. 🍲",
         "Jangan sambung tidur lagi, bangun sekarang! Sahur kejap je, tak lama pun! ⏳",
-        "Saya tahu selimut tu sedap, tapi sahur lagi penting! Bangun sekarang! 🛌",
+        "Bangun. Saya tahu selimut tu sedap, tapi sahur lagi penting! Bangun sekarang! 🛌",
         "Cepat bangun, tak nak nanti merungut lapar masa puasa! Sahur dulu. 🍽️"
     ],
     secondAttempt: [
@@ -20,13 +19,13 @@ module.exports = {
         "Saya bukan suka-suka kejut ni! Cepat bangun sebelum saya naik angin! ⚡",
         "Bangunlah! Nak kena simbah air baru nak gerak ke?! 🚿",
         "Saya dah cakap bangun! Kalau terlepas sahur, jangan nangis! 😤",
-        "Jangan sampai saya call mak ayah awak! Bangun cepat! 📞",
+        "Jangan sampai saya jadi gorgon eh! Bangun cepat! 📞",
         "Kalau saya kena kejut sekali lagi, siap awak! Bangun! ⏰",
         "Dah lah! Jangan buat perangai, bangun sekarang juga! 🔥"
     ],
     finalAttempt: [
         "Haih... dah lah, saya give up. Tidur je lah kalau tu yang awak nak. 😞",
-        "Takpelah... saya dah usaha. Kalau terlepas sahur, salah awak sendiri. 😔",
+        "Takpelah... penat dah. Kalau terlepas sahur, salah awak sendiri. 😔",
         "Penat dah saya kejut... kalau awak tak nak bangun, saya tak boleh buat apa. 😩",
         "Okey, saya tak kejut dah. Kalau lapar nanti, jangan salahkan saya. 🤷‍♂️",
         "Awak menang. Saya dah tak larat nak kejut lagi. Tidurlah puas-puas. 😪",
@@ -35,8 +34,7 @@ module.exports = {
         "Tak guna pun kalau saya kejut lagi... saya serah je kat takdir. 😞",
         "Saya dah cuba... tapi kalau awak tetap nak tidur, saya tak boleh buat apa. 😔",
         "Okey, fine. Saya give up. Saya pergi makan sahur sorang-sorang je lah. 🥲"
-    ]
-    ,
+    ],
     okResponse: [
         "Akhirnya! Dah bangun pun. Jom sahur cepat! 🍽️",
         "Lama betul nak bangun! Nasib baik saya rajin kejut. 😆",
@@ -48,5 +46,21 @@ module.exports = {
         "Bagus, awak dah bangun! Jangan lupa makan yang cukup! 🍚",
         "Syukur! Tak sia-sia saya jerit tadi. Makan elok-elok! 😆",
         "Finally! Dah bangun pun. Jom makan sebelum waktu habis! 🥘"
+    ],
+    dailyQuotes: [
+        "🌞 *Monday Mood:* Haa Monday dah datang awak! Jangan malas-malas tau, buat kerja elok-elok okay? Awak boleh! 💪💕",
+        "💡 *Tuesday Talk:* Awak, jangan stress sangat okay? Apa pun jadi, awak tetap hebat. Chill and keep going! 🥰✨",
+        "😊 *Wednesday Wisey:* Harini awak kena senyum banyak-banyak! Sebab senyuman awak tu buat dunia ni lagi ceria tau. 😘💖",
+        "🔥 *Thursday Spirit:* Awak jangan give up tau! Kejayaan tengah tunggu awak je tu. Sikit lagi je, kuatkan semangat! 🚀💯",
+        "🎉 *Friday Feeling:* Yeay, Friday awak! Malam ni nak makan apa? Hehe, janji awak happy tauu! 🥳💕",
+        "☀️ *Saturday Chill:* Hari Sabtu ni, awak jangan kerja kuat sangat. Rehat sikit, tengok movie, makan sedap-sedap okay? Awak kena enjoy jugak! 🥰🍿",
+        "🌻 *Sunday Love:* Awak, jangan sedih kalau esok Monday balik. Hari ni kita chill dulu, recharge tenaga! Nanti esok kita fight lagi. 😘💖"
     ]
 };
+
+function getTodayQuote() {
+    const todayIndex = new Date().getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+    return module.exports.dailyQuotes[todayIndex]; 
+}
+
+module.exports.getTodayQuote = getTodayQuote;
