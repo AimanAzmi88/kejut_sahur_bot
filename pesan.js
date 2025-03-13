@@ -4,7 +4,7 @@ module.exports = {
         "Awak, bangun! Cepat sahur, nanti tak larat nk puasa, jangan skip. 🍚",
         "Awak, jangan malas! Jom bangun sekarang, makan sikit dulu. 🌙",
         "Awak, bangun. Saya kejut ni sebab saya ambil berat. Cepat bangun sebelum waktu habis! ⏰",
-        "BAngun. Jangan tidur lagi, nanti menyesal kalau terlepas sahur! Jom bangun! 😴➡️🍽️",
+        "Bangun. Jangan tidur lagi, nanti menyesal kalau terlepas sahur! Jom bangun! 😴➡️🍽️",
         "Bangun, sebelum saya kejut banyak kali! Sahur penting untuk tenaga esok! 💪",
         "Awak, sahur kejap je, makan sikit pun tak apa. Janji ada tenaga nanti. 🍲",
         "Jangan sambung tidur lagi, bangun sekarang! Sahur kejap je, tak lama pun! ⏳",
@@ -48,14 +48,15 @@ module.exports = {
         "Finally! Dah bangun pun. Jom makan sebelum waktu habis! 🥘"
     ],
     dailyQuotes: [
+        "🌻 *Sunday Love:* Awak, jangan sedih kalau esok Monday balik. Hari ni kita chill dulu, recharge tenaga! Nanti esok kita fight lagi. 😘💖",
         "🌞 *Monday Mood:* Haa Monday dah datang awak! Jangan malas-malas tau, buat kerja elok-elok okay? Awak boleh! 💪💕",
         "💡 *Tuesday Talk:* Awak, jangan stress sangat okay? Apa pun jadi, awak tetap hebat. Chill and keep going! 🥰✨",
         "😊 *Wednesday Wisey:* Harini awak kena senyum banyak-banyak! Sebab senyuman awak tu buat dunia ni lagi ceria tau. 😘💖",
         "🔥 *Thursday Spirit:* Awak jangan give up tau! Kejayaan tengah tunggu awak je tu. Sikit lagi je, kuatkan semangat! 🚀💯",
         "🎉 *Friday Feeling:* Yeay, Friday awak! Malam ni nak makan apa? Hehe, janji awak happy tauu! 🥳💕",
-        "☀️ *Saturday Chill:* Hari Sabtu ni, awak jangan kerja kuat sangat. Rehat sikit, tengok movie, makan sedap-sedap okay? Awak kena enjoy jugak! 🥰🍿",
-        "🌻 *Sunday Love:* Awak, jangan sedih kalau esok Monday balik. Hari ni kita chill dulu, recharge tenaga! Nanti esok kita fight lagi. 😘💖"
+        "☀️ *Saturday Chill:* Hari Sabtu ni, awak jangan kerja kuat sangat. Rehat sikit, tengok movie, makan sedap-sedap okay? Awak kena enjoy jugak! 🥰🍿"
     ]
+    
 };
 
 function getTodayQuote() {

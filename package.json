@@ -13,6 +13,7 @@
     "@adiwajshing/baileys": "^5.0.0",
     "@whiskeysockets/baileys": "^6.7.16",
     "dotenv": "^16.4.7",
+    "moment-timezone": "^0.5.47",
     "node-cron": "^3.0.3",
     "node-schedule": "^2.1.1",
     "pino": "^9.6.0",

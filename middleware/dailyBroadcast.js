@@ -5,7 +5,7 @@ const fs = require('fs');
 // Function to send daily Good Morning messages
 function scheduleDailyBroadcast(conn, users) {
     // Schedule at 8:00 AM Malaysia/Kuala Lumpur time (UTC+8)
-    const job = schedule.scheduleJob({ hour: 11, minute: 2, tz: 'Asia/Kuala_Lumpur' }, async function () {
+    const job = schedule.scheduleJob({ hour: 8, minute: 0, tz: 'Asia/Kuala_Lumpur' }, async function () {
         if (!conn) {
             console.log('❌ Connection not available. Cannot send daily broadcast.');
             return;
@@ -23,7 +23,7 @@ function scheduleDailyBroadcast(conn, users) {
             for (const user in users) {
                 console.log(`📩 Sending "Good Morning" to ${user}...`);
                 try {
-                    await conn.sendMessage(user, { text: `🌞 *Selamat tPagi Awak* \n\n${quote}` });
+                    await conn.sendMessage(user, { text: `🌞 *Selamat Pagi Awak* \n\n${quote}` });
                     successCount++;
                     console.log(`✅ Sent to ${user}`);
                     await new Promise(resolve => setTimeout(resolve, 2000)); // Delay to prevent spam detection

@@ -97,7 +97,7 @@ async function startBot() {
                 }
             }
 
-            if (users[sender]?.cycles >= 3 && !users[sender].unlocked) {
+            if (users[sender]?.cycles >= 10 && !users[sender].unlocked) {
                 if (!uuidRequests[sender]) {
                     uuidRequests[sender] = true;
                     await conn.sendMessage(sender, { 
@@ -133,8 +133,20 @@ async function startBot() {
                 return;
             }
 
-            if (text.includes('hye') || text.includes('hello')) {
-                await conn.sendMessage(sender, { text: 'Hye awak, mesti nak saya kejut sahur la tu. nak kejut pukul berapa? (e.g., 1:20 atau 5:00)' });
+            if (
+                text.includes('hye') || 
+                text.includes('hi') || 
+                text.includes('hello') || 
+                text.includes('awak') || 
+                text.includes('hai')
+            ) {
+                await conn.sendMessage(sender, { text: 'Hye awak! 😍' });
+                await new Promise(resolve => setTimeout(resolve, 1000)); // 1s delay for natural flow
+            
+                await conn.sendMessage(sender, { text: 'Mesti awak nak saya kejut sahur la tu? 😏' });
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            
+                await conn.sendMessage(sender, { text: 'Nak saya kejut pukul berapa? ⏰ contoh 5:00 atau 5:15' });
             } else if (/^\d{1,2}:\d{2}$/.test(text)) {
                 const time = convertTo24HourFormat(text); // Use the imported middleware
                 if (!time.valid) {
