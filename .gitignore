@@ -3,3 +3,4 @@ auth_info
 users.json
 wake_up_times.json
 .env
+comment.json

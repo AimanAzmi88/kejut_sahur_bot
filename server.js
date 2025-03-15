@@ -1,40 +1,53 @@
 const { useMultiFileAuthState, makeWASocket } = require('@whiskeysockets/baileys');
 const fs = require('fs');
 const pino = require('pino');
-const { v4: uuidv4 } = require('uuid');
-require('dotenv').config(); 
-const pesan = require('./pesan'); // Import messages
-const { convertTo24HourFormat } = require('./middleware/timeMiddleware'); // Import time middleware
-const { scheduleWakeUpMessage } = require('./middleware/scheduleMiddleware'); // Import schedule middleware
+require('dotenv').config();
+const pesan = require('./pesan');
+const { convertTo24HourFormat } = require('./middleware/timeMiddleware');
+const { scheduleWakeUpMessage } = require('./middleware/scheduleMiddleware');
 const { scheduleDailyBroadcast } = require('./middleware/dailyBroadcast');
-const { sendBroadcastMessage } = require('./middleware/broadcastMiddleware')
+const { sendBroadcastMessage } = require('./middleware/broadcastMiddleware');
+const { saveWakeUpTimes, stopWakeUpAttempts, rescheduleWakeUpMessages, wakeUpTimes } = require('./middleware/wakeUpMiddleware');
+const { fetchPrayerTimes } = require('./middleware/prayerTimeMiddleware');
 
-const WAKEUP_FILE = 'wake_up_times.json';
 const USERS_FILE = 'users.json';
+const COMMENTS_FILE = 'comment.json';
 const ADMIN_NUMBER = process.env.ADMIN_NUMBER;
 
+// Ensure JSON files exist
 if (!fs.existsSync(USERS_FILE) || fs.readFileSync(USERS_FILE, 'utf8').trim() === '') {
     fs.writeFileSync(USERS_FILE, JSON.stringify({}, null, 2));
 }
 
-let wakeUpTimes = fs.existsSync(WAKEUP_FILE) ? JSON.parse(fs.readFileSync(WAKEUP_FILE, 'utf8')) : {};
+if (!fs.existsSync(COMMENTS_FILE) || fs.readFileSync(COMMENTS_FILE, 'utf8').trim() === '') {
+    fs.writeFileSync(COMMENTS_FILE, JSON.stringify([], null, 2));
+}
+
 let users = JSON.parse(fs.readFileSync(USERS_FILE, 'utf8'));
+let comments = JSON.parse(fs.readFileSync(COMMENTS_FILE, 'utf8'));
 let conn;
 const activeWakeUps = {};
 const scheduledJobs = {};
 const pendingTimeouts = {};
-const uuidRequests = {}; // Track users asked for UUID input
-let broadcastState = false; // Track if admin is in broadcast mode
+const userContext = {};
+const waitingForLocation = {};
 
+// Save users to JSON
 function saveUsers() {
     fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
 }
 
+// Save comments to JSON
+function saveComments() {
+    fs.writeFileSync(COMMENTS_FILE, JSON.stringify(comments, null, 2));
+}
+
+// Ensure a user is registered
 function ensureUser(sender) {
     if (sender !== ADMIN_NUMBER && !users[sender]) {
-        users[sender] = { cycles: 0, uuid: uuidv4(), unlocked: false };
+        users[sender] = {};
         saveUsers();
-        console.log(`✅ New user added: ${sender}, UUID: ${users[sender].uuid}`);
+        console.log(`✅ New user added: ${sender}`);
     }
 }
 
@@ -52,7 +65,7 @@ async function startBot() {
     conn.ev.on('connection.update', (update) => {
         if (update.connection === 'open') {
             console.log('✅ Connected to WhatsApp!');
-            rescheduleWakeUpMessages();
+            rescheduleWakeUpMessages(wakeUpTimes, conn, activeWakeUps, scheduledJobs, pendingTimeouts, pesan, convertTo24HourFormat, scheduleWakeUpMessage);
             scheduleDailyBroadcast(conn, users);
         }
         if (update.connection === 'close') {
@@ -69,124 +82,104 @@ async function startBot() {
 
             ensureUser(sender);
 
-            // Admin Commands
-            if (sender === ADMIN_NUMBER) {
-                if (text === 'hye') {
-                    await conn.sendMessage(sender, { text: 'Hello Admin! Do you want to fetch data or broadcast a message? (Type "data" or "broadcast")' });
-                    return;
-                }
-
-                if (text === 'data') {
-                    const usersData = JSON.stringify(users, null, 2);
-                    await conn.sendMessage(sender, { text: `📂 *Users Data:*\n\`\`\`${usersData}\`\`\`` });
-                    return;
-                }
-
-                if (text === 'broadcast') {
-                    broadcastState = true; // Enter broadcast mode
-                    await conn.sendMessage(sender, { text: 'Please type your broadcast message:' });
-                    return;
-                }
-
-                if (broadcastState) {
-                    // Admin is in broadcast mode, treat the next message as the broadcast message
-                    broadcastState = false; // Exit broadcast mode
-                    console.log(`📢 Admin broadcast message detected: ${text}`);
-                    await sendBroadcastMessage(conn, users, text);
-                    return;
-                }
+            // 🟢 Handle admin broadcast command
+            if (text === 'broadcast' && sender === ADMIN_NUMBER) {
+                userContext[sender] = 'waitingForBroadcastMessage';
+                await conn.sendMessage(sender, { text: '📢 Sila masukkan mesej yang ingin dihantar kepada semua pengguna.' });
+                return;
             }
 
-            if (users[sender]?.cycles >= 10 && !users[sender].unlocked) {
-                if (!uuidRequests[sender]) {
-                    uuidRequests[sender] = true;
-                    await conn.sendMessage(sender, { 
-                        text: `🚀 Nak guna tanpa had? Jom support projek ni dengan buat *donation* kat *Sociobuzz*!  
-                        💖 Berapa pun tak kisah, yang penting ikhlas!  
-                        🔗 *Link:* https://sociabuzz.com/aimanazmi  
-                    
-                        📩 Dah donate? Hantar bukti derma kat sini, nanti saya bagi *key* untuk unlock penggunaan tanpa had! Terima kasih sebab support! 🙌`
-                    });
+            // 🟢 Handle admin's broadcast message
+            if (userContext[sender] === 'waitingForBroadcastMessage' && sender === ADMIN_NUMBER) {
+                delete userContext[sender];
+                const broadcastMessage = text.trim();
+
+                if (!broadcastMessage) {
+                    await conn.sendMessage(sender, { text: '❌ Mesej tidak boleh kosong. Sila hantar semula !broadcast.' });
                     return;
                 }
-                if (text === users[sender].uuid) {
-                    users[sender].unlocked = true;
-                    saveUsers();
-                    delete uuidRequests[sender];
-                    await conn.sendMessage(sender, { text: '✅ Penggunaan tanpa had telah dibuka untuk anda! 🎉' });
+
+                await sendBroadcastMessage(conn, users, broadcastMessage);
+                return;
+            }
+
+            // 🟢 Handle admin request for users.json
+            if (text === 'data' && sender === ADMIN_NUMBER) {
+                const usersString = JSON.stringify(users, null, 2);
+                await conn.sendMessage(sender, { text: `📂 *Users Data:*\n\n\`\`\`${usersString}\`\`\`` });
+                return;
+            }
+
+            // 🟢 Handle location messages for prayer times
+            if (waitingForLocation[sender] && message.message?.locationMessage) {
+                delete waitingForLocation[sender];
+
+                const lat = message.message.locationMessage.degreesLatitude;
+                const long = message.message.locationMessage.degreesLongitude;
+
+                const { prayerTimesText, error } = await fetchPrayerTimes(lat, long);
+
+                if (error) {
+                    await conn.sendMessage(sender, { text: '❌ Maaf, saya tak dapat cari waktu solat untuk lokasi ini.' });
+                } else {
+                    await conn.sendMessage(sender, { text: prayerTimesText });
                 }
                 return;
             }
 
-            if (activeWakeUps[sender]) {
-                stopWakeUpAttempts(sender);
-                delete wakeUpTimes[sender];
-                saveWakeUpTimes();
+            // 🟢 Handle comments (!komen <review>)
+            if (text.startsWith('!komen ')) {
+                const review = text.replace('!komen ', '').trim();
+                if (review.length === 0) {
+                    await conn.sendMessage(sender, { text: '❌ Komen tidak boleh kosong. Sila cuba lagi.' });
+                    return;
+                }
 
-                users[sender].cycles += 1;
-                saveUsers();
+                // Save the comment
+                const newComment = { sender, review, timestamp: new Date().toISOString() };
+                comments.push(newComment);
+                saveComments();
 
-                const randomPesanOk = pesan.okResponse[Math.floor(Math.random() * pesan.okResponse.length)];
-                await conn.sendMessage(sender, { text: randomPesanOk });
+                await conn.sendMessage(sender, { text: '✅ Terima kasih atas komen anda! Kami sangat menghargainya. 😊' });
 
-                delete activeWakeUps[sender]; // ✅ Ensure wake-ups are stopped
+                // Forward the comment to the admin
+                await conn.sendMessage(ADMIN_NUMBER, { 
+                    text: `📩 *Komen baru diterima:*\n\n📌 *Pengguna:* ${sender}\n💬 *Komen:* ${review}` 
+                });
                 return;
             }
 
-            if (
-                text.includes('hye') || 
-                text.includes('hi') || 
-                text.includes('hello') || 
-                text.includes('awak') || 
-                text.includes('hai')
-            ) {
-                await conn.sendMessage(sender, { text: 'Hye awak! 😍' });
-                await new Promise(resolve => setTimeout(resolve, 1000)); // 1s delay for natural flow
-            
-                await conn.sendMessage(sender, { text: 'Mesti awak nak saya kejut sahur la tu? 😏' });
+            // 🟢 Handle greeting messages
+            if (text.includes('hye') || text.includes('hi') || text.includes('hello') || text.includes('awak') || text.includes('hai')) {
+                const greeting = pesan.greetingsResponses[Math.floor(Math.random() * pesan.greetingsResponses.length)];
+                const followUp = pesan.followUpResponses[Math.floor(Math.random() * pesan.followUpResponses.length)];
+                const stopMsg = pesan.stopReminder[Math.floor(Math.random() * pesan.stopReminder.length)];
+
+                await conn.sendMessage(sender, { text: greeting });
                 await new Promise(resolve => setTimeout(resolve, 1000));
-            
-                await conn.sendMessage(sender, { text: 'Nak saya kejut pukul berapa? ⏰ contoh 5:00 atau 5:15' });
-            } else if (/^\d{1,2}:\d{2}$/.test(text)) {
-                const time = convertTo24HourFormat(text); // Use the imported middleware
-                if (!time.valid) {
-                    await conn.sendMessage(sender, { text: '⚠️ Format salah! Contoh: 1:20 atau 5:00.' });
-                    return;
-                }
+                await conn.sendMessage(sender, { text: followUp });
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                await conn.sendMessage(sender, { text: stopMsg });
 
-                wakeUpTimes[sender] = time.formattedTime;
-                saveWakeUpTimes();
-                await conn.sendMessage(sender, { text: `Ok awak, pukul ${time.formattedTime} pagi nanti saya kejut! 💖` });
-                scheduleWakeUpMessage(sender, time.hour24, time.minute, conn, activeWakeUps, scheduledJobs, pendingTimeouts, pesan);
+                userContext[sender] = 'waitingForChoice';
+                return;
+            }
+
+            // 🟢 Handle stop command
+            if (text === '!stop') {
+                delete users[sender];
+                saveUsers();
+                if (wakeUpTimes[sender]) {
+                    delete wakeUpTimes[sender];
+                    saveWakeUpTimes();
+                }
+                await conn.sendMessage(sender, { text: '🥺 Sehingga kita berjumpa lagi' });
+                await conn.sendMessage(sender, { text: 'Kalau awak perlukan, saya sentiasa ada 😉' });
+                await conn.sendMessage(sender, { text: 'Type "Hai" je tau 😊' });
+                return;
             }
         }
     });
-}
-function stopWakeUpAttempts(sender) {
-    if (scheduledJobs[sender]) {
-        scheduledJobs[sender].stop();
-        delete scheduledJobs[sender];
-    }
-
-    if (pendingTimeouts[sender]) {
-        for (const timeout of pendingTimeouts[sender]) {
-            clearTimeout(timeout);
-        }
-        delete pendingTimeouts[sender];
-    }
-
-    delete activeWakeUps[sender]; // ✅ Completely remove active wake-ups
-}
-
-function rescheduleWakeUpMessages() {
-    for (const sender in wakeUpTimes) {
-        const time = convertTo24HourFormat(wakeUpTimes[sender]);
-        if (time.valid) scheduleWakeUpMessage(sender, time.hour24, time.minute, conn, activeWakeUps, scheduledJobs, pendingTimeouts, pesan);
-    }
-}
-
-function saveWakeUpTimes() {
-    fs.writeFileSync(WAKEUP_FILE, JSON.stringify(wakeUpTimes, null, 2));
 }
 
 startBot();
