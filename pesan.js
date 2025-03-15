@@ -60,23 +60,23 @@ module.exports = {
         "Hye awak! 😊 Saya ada di sini untuk bantu awak.",
         "Assalamualaikum awak! 🌸 Nak saya tolong apa-apa ke?",
         "Hai awak! ✨ Saya sentiasa ada kalau awak perlukan bantuan.",
-        "Salam awak! 😊 Saya boleh bantu kejut sahur atau semak waktu solat, awak nak yang mana?",
+        "Salam awak! 😊 Saya boleh bantu awak, awak nak yang mana?",
         "Hello awak! 🌙 Kalau awak perlukan saya, saya sedia membantu!"
     ],
     
     followUpResponses: [
         "Awak nak saya **kejut sahur** supaya tak terlepas makan? Atau nak saya bagi **waktu solat** terkini? 🕌😊",
         "Saya boleh **kejut sahur** supaya awak ada tenaga esok, atau tunjukkan **waktu solat** hari ni. Awak pilih yang mana? 🌙",
-        "Nak saya **set alarm kejut sahur** atau semak **waktu solat** untuk awak? Saya boleh bantu! 😊",
+        "Nak saya **kejut sahur** atau semak **waktu solat** untuk awak? Saya boleh bantu! 😊",
         "Kalau awak nak, saya boleh **kejut sahur** atau tunjukkan **waktu solat** harian. Mana satu pilihan awak? 🌸",
         "Saya ada dua pilihan khas untuk awak: **kejut sahur** atau bagi **waktu solat** terkini. Awak nak yang mana? 😊"
     ],
     
     stopReminder: [
-        "Kalau awak nak **berhenti terima update**, awak boleh reply *!stop* ya. Saya faham. 😊",
+        "Kalau awak nak berhenti terima update, awak boleh reply *!stop* ya. Saya faham. 😊",
         "Rasa tak perlukan saya lagi? Tak mengapa, awak boleh reply *!stop* bila-bila masa. 🌸",
-        "Saya sentiasa ada kalau awak perlukan! Tapi kalau nak **henti mesej**, reply *!stop* okay? 😊",
-        "Kalau awak rasa dah cukup, boleh je reply *!stop* untuk **berhenti terima mesej**. Saya okay je! ✨",
+        "Saya sentiasa ada kalau awak perlukan! Tapi kalau nak henti mesej, reply *!stop* okay? 😊",
+        "Kalau awak rasa dah cukup, boleh je reply *!stop* untuk berhenti terima mesej. Saya okay je! ✨",
         "Tak nak terima mesej lagi? Saya faham. Bila-bila masa awak boleh reply *!stop* ya. 🌙"
     ]
     
